@@ -244,6 +244,6 @@ public class Descifradores {
                "IQKXKE V OERCTCHEJAI RIJ XTTI XT DINHXKCIK HKCZJOI OKEJSZCNHE.");
 
         //descifrador.cifrar_descifrar_XOR("ATAQUE AL AMANECER", "CLAVE12345678901");
-        //Commit verificado 3
+        //michibollo (labo de dbd)
     }
 }
