@@ -62,23 +62,15 @@ public class Descifradores {
 
             inputIndex++;
         }
-        double suma = 0.0;
 
         //En este bucle se cuenta la cantidad de caracteres totales, obviando espacios
-        suma = this.calcular_suma(diccionario);
+        int suma = this.calcular_suma(diccionario);
 
 
-        //Como el enunciado indica que la solución "puede" (básicamente obliga XD) a que sea interactiva, le pedimos al
-        //usuario que introduzca la letra correspondiente a la frecuencia que se muestra por pantalla.
-        System.out.println("Normalizando resultados y relacionándolo con la tabla de frecuencias...");
-        System.out.println("Se ha llevado todo el proceso a cabo, por favor, viendo las letras y la tabla de" +
-                " frecuencias, introduzca que letra cree que es la real");
-
-        int txtActIndex = 0;
-        char[] txtAct = input.toCharArray();
         Set<Character> keys = diccionario.keySet();
 
         //Antes de hacer nada hay que escanear bigramas, trigramas y tetragramas
+        //En este caso voy a hacerlo medio básico y solo voy a escanear bigramas, y además unos pocos
 
         //búsqueda de bigramas
         //Si alguno no sabe de regex (yo tampoco sé mucho), básicamente miro si los grupos de dos letras están rodeados
@@ -91,22 +83,22 @@ public class Descifradores {
                 .map(MatchResult::group)
                 .toList();
 
-        //Hago otro mapa de frecuencias
+        //Hago otro mapa de frecuencias con la info de los bigramas
         HashMap<String, Integer> bigramas = new HashMap<>();
         for(String bigr:resultados){
             bigramas.put(bigr, bigramas.getOrDefault(bigr, 0) + 1);
         }
 
         //Inicializo una lista con los posibles valores de las letras que queden, inicialmente están todos
-        //pero se les va a ir restando
+        //pero se les va a ir restando según se usen
         HashSet<Character> posibles = new HashSet<>(diccionario.keySet());
         for (char c = 'a'; c <= 'z'; c++) {
             posibles.add(c);
         }
 
         String[] lookUpTableBigr = {"de", "la", "en", "el", "un"};
-        //Cojo el valor más grande y lo relaciono directamente con el bigrama más repetido, cinco veces
 
+        //Cojo el valor más grande y lo relaciono directamente con el bigrama más repetido, cinco veces
         for(int i = 0; i < 5; i++) {
             String max = Objects.requireNonNull(bigramas.entrySet()
                     .stream()
@@ -157,7 +149,7 @@ public class Descifradores {
             System.out.println("Letras posibles: " + posibles);
 
 
-            //GPT-ada nivel dios esto, me da una pereza increible ponerme a hacer esto ahora xd
+            //GPT-ada nivel dios esto, me da una pereza increíble ponerme a hacer esto ahora xd
             char cifradaMayus = Character.toUpperCase(iteAct);
 
             Set<String> palabrasConLetra = Pattern.compile("\\b\\p{L}*" + Pattern.quote(String.valueOf(cifradaMayus)) + "\\p{L}*\\b")
@@ -168,7 +160,7 @@ public class Descifradores {
 
             System.out.println("Aparece en las palabras: " + palabrasConLetra);
             System.out.println("Introduzca la letra que crea que corresponde");
-
+            //gracias gemini
 
             //En caso de que en el string haya mayúsculas, las pasamos a minúsculas
             //'A' = 65, 'Z' = 90, 'a' = 95, 'z' = 122
@@ -199,13 +191,35 @@ public class Descifradores {
             }
             System.out.println("Actualizando...");
             System.out.println();
-            System.out.println("texto actualizado: " + input);
+            System.out.println("Texto actualizado: " + input);
 
         }
 
 
 
     }
+
+    public void cifrar_descifrar_XOR(String text, String key)
+    {
+
+        text = text.replaceAll("\\s+", "");
+
+        byte[] textBytes = text.getBytes();
+        byte[] keyBytes = key.getBytes();
+        byte[] resBytes = new byte[textBytes.length];
+        for(int i = 0; i < textBytes.length; i++){
+            resBytes[i] = (byte) (textBytes[i] ^ keyBytes[i]);
+        }
+
+        //Por alguna razón el texto no se mostraba de manera correcta ya que utf-8 no leía bien todos los bytes
+        //Se puede cambiar la codificación o directamente pasarlo a base 64, que es lo que he hecho
+        System.out.println("Texto actual cifrado: " + Base64.getEncoder().encodeToString(resBytes));
+        for (int i = 0; i < keyBytes.length; i++) {
+            resBytes[i] = (byte) (resBytes[i] ^ keyBytes[i]);
+        }
+        System.out.println("Texto descifrado: " + new String(resBytes));
+    }
+
 
     public <T> int calcular_suma( Map<T, Integer> pHashMap){
         int suma = 0;
@@ -218,15 +232,17 @@ public class Descifradores {
         Descifradores descifrador = new Descifradores();
         //descifrador.descifrar_cesar("Uunejvxb dw vdwmx wdnex jzdr, nw wdnbcaxb lxajixwnb");
         descifrador.descifrar_tabla_de_frecuencias("RIJ AZKKZHC PIKCE XT ACKCUXJHX SZX, E NZ PEJXKE, PXGIK " +
-                "XFDKXNEQE RIPI RIPQEHCK ET OENRCNPI AXNAX ZJ RKCHXKCI AX CJAXDXJAXJRCE AX RTENX, E ACOXKXJRCE AXT " +
-                "RITEQIKERCIJCNPI OKXJHXDIDZTCNHE AX TE ACKXRRCIJ EJEKSZCNHE AZKKZHC OZX ZJ OERHIK AX DKCPXK IKAXJ XJ " +
-                "XT DEDXT AX TE RTENX IQKXKE XJ REHETZJVE XJ GZTCI AX 1936. DXKI AZKKZHC, RIPI IRZKKX RIJ TEN " +
-                "DXKNIJETCAEAXN XJ TE MCNHIKCE, JI REVI AXT RCXTI. DXKNIJCOCREQE TE HKEACRCIJ KXvITZRCIJEKCE AX TE " +
-                "RTENX IQKXKE. NZ XJIKPX DIDZTEKCAEA XJHKX TE RTENX HKEQEGEAIKE, KXOTXGEAE XJ XT XJHCXKKI " +
-                "PZTHCHZACJEKCI XJ QEKRXTIJE XT 22 AX JIvCXPQKX AX 1936, PZXNHKE XNE CAXJHCOCRERCIJ. NZ PZXKHX OZX " +
-                "NCJ AZAE ZJ UITDX IQGXHCvI ET DKIRXNI KXvITZRCIJEKCI XJ PEKRME. NCJ AZKKZHC SZXAI PEN TCQKX XT " +
-                "REPCJI DEKE SZX XT XNHETCJCNPI, RIJ TE RIPDTCRCAEA AXT UIQCXKJI AXT OKXJHX DIDZTEK V AX TE ACKXRRCIJ " +
-                "EJEKSZCNHE, HXKPCJEKE XJ PEVI AX 1937 TE HEKXE AX TCSZCAEK TE KXvITZRCIJ, AXNPIKETCLEJAI E TE RTENX " +
-                "IQKXKE V OERCTCHEJAI RIJ XTTI XT DINHXKCIK HKCZJOI OKEJSZCNHE.");
+               "XFDKXNEQE RIPI RIPQEHCK ET OENRCNPI AXNAX ZJ RKCHXKCI AX CJAXDXJAXJRCE AX RTENX, E ACOXKXJRCE AXT " +
+               "RITEQIKERCIJCNPI OKXJHXDIDZTCNHE AX TE ACKXRRCIJ EJEKSZCNHE AZKKZHC OZX ZJ OERHIK AX DKCPXK IKAXJ XJ " +
+               "XT DEDXT AX TE RTENX IQKXKE XJ REHETZJVE XJ GZTCI AX 1936. DXKI AZKKZHC, RIPI IRZKKX RIJ TEN " +
+               "DXKNIJETCAEAXN XJ TE MCNHIKCE, JI REVI AXT RCXTI. DXKNIJCOCREQE TE HKEACRCIJ KXvITZRCIJEKCE AX TE " +
+               "RTENX IQKXKE. NZ XJIKPX DIDZTEKCAEA XJHKX TE RTENX HKEQEGEAIKE, KXOTXGEAE XJ XT XJHCXKKI " +
+               "PZTHCHZACJEKCI XJ QEKRXTIJE XT 22 AX JIvCXPQKX AX 1936, PZXNHKE XNE CAXJHCOCRERCIJ. NZ PZXKHX OZX " +
+               "NCJ AZAE ZJ UITDX IQGXHCvI ET DKIRXNI KXvITZRCIJEKCI XJ PEKRME. NCJ AZKKZHC SZXAI PEN TCQKX XT " +
+               "REPCJI DEKE SZX XT XNHETCJCNPI, RIJ TE RIPDTCRCAEA AXT UIQCXKJI AXT OKXJHX DIDZTEK V AX TE ACKXRRCIJ " +
+               "EJEKSZCNHE, HXKPCJEKE XJ PEVI AX 1937 TE HEKXE AX TCSZCAEK TE KXvITZRCIJ, AXNPIKETCLEJAI E TE RTENX " +
+               "IQKXKE V OERCTCHEJAI RIJ XTTI XT DINHXKCIK HKCZJOI OKEJSZCNHE.");
+
+        //descifrador.cifrar_descifrar_XOR("ATAQUE AL AMANECER", "CLAVE12345678901");
     }
 }
